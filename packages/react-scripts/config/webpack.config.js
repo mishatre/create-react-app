@@ -60,6 +60,9 @@ const imageInlineSizeLimit = parseInt(
 // Check if TypeScript is setup
 const useTypeScript = fs.existsSync(paths.appTsConfig);
 
+// Get the path to the uncompiled service worker (if it exists).
+const swSrc = paths.swSrc;
+
 // style files regexes
 const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
@@ -691,13 +694,13 @@ module.exports = function (webpackEnv) {
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       // Generate a service worker script that will precache, and keep up to date,
       // the HTML & assets that are part of the webpack build.
-      isEnvProduction &&
+
+      // isEnvProduction && 
+        fs.existsSync(swSrc) &&
       new WorkboxWebpackPlugin.InjectManifest({
-        exclude: [/\.map$/, /asset-manifest\.json$/],
-        swSrc: `${paths.appSrc}/sw-template.ts`,
-        // swDest: `${paths.appBuild}/service-worker.js`,
-        swDest: 'service-worker.js',
-        maximumFileSizeToCacheInBytes: isEnvProduction ? 2097152 : 50000000,
+        swSrc,
+        dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
+        exclude: [/\.map$/, /asset-manifest\.json$/, /LICENSE/],
       }),
       // TypeScript type checking
       useTypeScript &&
